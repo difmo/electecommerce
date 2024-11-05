@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import Navbar from "./components/Navbar";
 import Product from "./components/Product";
-import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  BrowserRouter,
+} from "react-router-dom";
 import ProductDetail from "./components/ProductDetail";
 import SearchItem from "./components/SearchItem";
 import Cart from "./components/Cart";
@@ -18,11 +23,12 @@ const App = () => {
     <>
       <BrowserRouter>
         <Routes>
-          <Route element={<UserLayout cart={cart} setData={setData}/>}>
+          <Route element={<UserLayout cart={cart} setData={setData} />}>
             <Route
               path="/"
               element={<Product cart={cart} setCart={setCart} items={data} />}
             />
+
             <Route
               path="/product/:id"
               element={<ProductDetail cart={cart} setCart={setCart} />}
