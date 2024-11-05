@@ -18,7 +18,7 @@ const App = () => {
       <Router>
         <Navbar cart={cart} setData={setData} />
         <Routes>
-          <MainSlider />
+          
           <Route
             path="/"
             element={<Product cart={cart} setCart={setCart} items={data} />}
