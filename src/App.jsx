@@ -14,6 +14,7 @@ const App = () => {
   const [cart, setCart] = useState([]);
   return (
     <>
+    {/* //skcnslcnef sce[fecscoewfpewcsqc] */}
       <Router>
         <Navbar cart={cart} setData={setData} />
         <Routes>
