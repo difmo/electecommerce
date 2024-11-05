@@ -1,24 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { items } from "./Data";
 import { BsFillCartCheckFill } from "react-icons/bs";
+import LoginModal from "../pages/LoginPopUp";
+import FilterSidebar from "./Filterbar";
 
 const Navbar = ({ setData, cart }) => {
-  // console.log(useLocation())
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-
-  const filterByCategory = (category) => {
-    const element = items.filter((product) => product.category === category);
-    // console.log(element)
-    setData(element);
-  };
-
-  const filterByPrice = (price) => {
-    const element = items.filter((product) => product.price >= price);
-    setData(element);
-  };
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false); // State to manage modal visibility
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,70 +16,47 @@ const Navbar = ({ setData, cart }) => {
     setSearchTerm("");
   };
 
+  const toggleLoginModal = () => {
+    setLoginModalOpen(!isLoginModalOpen); // Toggle the modal state
+  };
+
   return (
     <>
-      <header className="sticky-top">
-        <div className="nav-bar">
-          <Link to={"/"} className="brand">
-            E-Cart
+      <header className="sticky top-0 z-50 shadow-md ">
+        <div className="flex items-center justify-between p-4 bg-maincolor">
+          {/* Brand Logo / Home Link */}
+          <Link to={"/"} className="text-2xl font-bold text-white">
+           Name
           </Link>
 
-          {/* <form
-            // onClick={handleSubmit}
-            onSubmit={handleSubmit}
-            className="search-bar"
-          >
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              type="text"
-              placeholder="Search Products"
-            />
-          </form> */}
-
-          <Link to={"/cart"} className="cart">
-            <button type="button" className="btn btn-primary position-relative">
-              <BsFillCartCheckFill style={{ fontSize: "1.5rem" }} />
-              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {cart.length}
-                <span className="visually-hidden">unread messages</span>
-              </span>
+          <div className="flex items-center space-x-4">
+            {/* Login Button */}
+            <button
+              onClick={toggleLoginModal}
+              className="px-4 py-2 transition duration-300 bg-white rounded-md text-maincolor hover:bg-blue-600"
+            >
+              Login
             </button>
-          </Link>
+
+            {/* Cart Button */}
+            <Link to={"/cart"} className="relative">
+              <button
+                type="button"
+                className="relative p-2 text-white transition duration-300 bg-blue-500 rounded-md hover:bg-blue-600"
+              >
+                <BsFillCartCheckFill style={{ fontSize: "1.5rem" }} />
+                <span className="absolute top-0 right-0 px-2 py-1 text-xs text-white translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
+                  {cart.length}
+                </span>
+              </button>
+            </Link>
+          </div>
         </div>
 
-        {
-          // location.pathname == '/' && (
-          //   <div className="nav-bar-wrapper">
-          //   <div className="items">Filter by {"->"}</div>
-          //   <div
-          //   onClick={()=>setData(items)}
-          //   className="items">No Filter</div>
-          //   <div
-          //   onClick={()=>filterByCategory('mobiles')}
-          //    className="items">Mobiles</div>
-          //   <div
-          //   onClick={()=>filterByCategory('laptops')}
-          //    className="items">Laptops</div>
-          //   <div
-          //   onClick={()=>filterByCategory('tablets')}
-          //    className="items">Tablets</div>
-          //   <div
-          //   onClick={()=>filterByPrice(29999)}
-          //   className="items">{">="}29999</div>
-          //   <div
-          //   onClick={()=>filterByPrice(49999)}
-          //   className="items">{">="}49999</div>
-          //   <div
-          //   onClick={()=>filterByPrice(69999)}
-          //   className="items">{">="}69999</div>
-          //   <div
-          //   onClick={()=>filterByPrice(89999)}
-          //   className="items">{">="}89999</div>
-          //   </div>
-          // )
-        }
+        {/* {location.pathname === "/" && <FilterSidebar setData={setData} />} */}
       </header>
+
+      {isLoginModalOpen && <LoginModal closeModal={toggleLoginModal} />}
     </>
   );
 };
