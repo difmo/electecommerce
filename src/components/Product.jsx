@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import MainSlider from "./MainSlider";
 
 const Product = ({ items, cart, setCart }) => {
   const addToCart = (id, price, title, description, imgSrc) => {
@@ -41,6 +42,7 @@ const Product = ({ items, cart, setCart }) => {
         pauseOnHover
         theme="dark"
       />
+      <MainSlider />
       <div className="container my-5">
         <div className="row">
           {items.map((product) => {
