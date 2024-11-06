@@ -9,7 +9,7 @@ const Cart = ({ cart, setCart }) => {
           <>
             <div className="text-center">
               <h1>Your Cart is Empty</h1>
-              <Link to={"/"} className="btn btn-warning">
+              <Link to={"/"} className="btn bg-greenbutten">
                 Continue Shopping...
               </Link>
             </div>
@@ -31,10 +31,8 @@ const Cart = ({ cart, setCart }) => {
                       <div className="card-body text-center">
                         <h5 className="card-title">{product.title}</h5>
                         <p className="card-text">{product.description}</p>
-                        <button className="btn btn-primary mx-3">
-                          {product.price} ₹
-                        </button>
-                        <button className="btn btn-warning">Buy Now</button>
+                        <button className=" mx-3">{product.price} ₹</button>
+                        <button className="btn bg-greenbutten">Buy Now</button>
                       </div>
                     </div>
                   </div>

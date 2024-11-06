@@ -78,7 +78,7 @@ const ProductDetail = ({ cart, setCart }) => {
                 product.imgSrc
               )
             }
-            className="btn btn-warning"
+            className="bg-greenbutten"
           >
             Add To Cart
           </button>
