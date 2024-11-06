@@ -41,7 +41,7 @@ const Product = ({ items, cart, setCart }) => {
         draggable
         pauseOnHover
         theme="dark"
-      />{" "}
+      />
       <MainSlider />
       <div className="container my-5">
         <div className="row">
