@@ -1,64 +1,149 @@
-import React, { useState } from 'react';
-import { FaArrowRight } from 'react-icons/fa'; 
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useFormik } from "formik";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import CustomInput from "../components/ReusableComponent/CustomInput";
+import CustomButton from "../components/ReusableComponent/CustomButton";
+import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
+import { auth } from "../firebase"; 
 
-const SignUpPopUp = () => {
-  const [phone, setPhone] = useState('');
 
-  const handlePhoneChange = (e) => {
-    setPhone(e.target.value);
+// Validation Schema using Yup
+const validationSchema = Yup.object({
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required')
+});
+
+const SignModal = ({ closeModal, switchToSignUp }) => {
+  const navigate = useNavigate();
+  const modalRef = useRef(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const waitForEmailVerification = async (user) => {
+    try {
+      const interval = setInterval(async () => {
+        await user.reload();
+        if (user.emailVerified) {
+          clearInterval(interval);  // Stop polling once verified
+          setSuccessMessage("Email successfully verified!");
+          navigate("/");
+        }
+      }, 5000); // Poll every 5 seconds
+    } catch (error) {
+      console.error("Error checking email verification:", error);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Phone number submitted:", phone);
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      setErrorMessage("");
+      setSuccessMessage("");
+      setLoading(true);
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+
+        if (user) {
+          await sendEmailVerification(user);
+          setSuccessMessage("Verification email sent! Please check your inbox.");
+          waitForEmailVerification(user);
+        } else {
+          setErrorMessage("Failed to get a valid user object.");
+        }
+      } catch (error) {
+        setErrorMessage(error.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        closeModal();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [closeModal]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full p-6 bg-white rounded-lg shadow-lg sm:w-96">
-        <div className="flex justify-center mb-4">
-          <img
-            // src="https://cdn.grofers.com/layout-engine/2023-11/app_logo.svg"
-            alt="Blinkit Image"
-            className="w-16 h-16"
-          />
-        </div>
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-semibold text-gray-700">Welcome to on our webpage</h1>
-          <p className="text-lg font-medium text-gray-500"> Sign up</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="tel"
-              maxLength="10"
-              value={phone}
-              onChange={handlePhoneChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter mobile number"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
+      <motion.div
+        ref={modalRef}
+        className="relative p-6 bg-white rounded-lg shadow-md w-96"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 50 }}
+        transition={{ duration: 0.3 }}
+      >
+        <button
+          onClick={closeModal}
+          className="absolute text-gray-500 top-2 right-2 hover:text-gray-800"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <h2 className="mb-4 text-xl font-bold">SignUp</h2>
+
+        <form onSubmit={formik.handleSubmit}>
+          <div className="mb-4">
+            <CustomInput
+              placeholder="Enter your email"
+              value={formik.values.email}
+              onChange={formik.handleChange("email")}
+              onBlur={formik.handleBlur("email")}
+              error={formik.touched.email && formik.errors.email}
+            />
+            <CustomInput
+              placeholder="Enter your password"
+              type="password"
+              value={formik.values.password}
+              onChange={formik.handleChange("password")}
+              onBlur={formik.handleBlur("password")}
+              error={formik.touched.password && formik.errors.password}
             />
           </div>
-          <button
+
+          <CustomButton
             type="submit"
-            className="flex items-center justify-center w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <span>Continue</span>
-            <FaArrowRight className="ml-2" />
-          </button>
+            btntitle={loading ? "Signing Up..." : "Sign Up"}
+            disabled={loading}
+          />
+
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+          {successMessage && <p className="text-green-500">{successMessage}</p>}
         </form>
-        <div className="mt-4 text-sm text-center text-gray-600">
-          <span>By continuing, you agree to our&nbsp;</span>
-          <a href="/terms" target="_blank" className="text-blue-500 hover:underline">
-            Terms of service
-          </a>
-          <span>&nbsp;&amp;&nbsp;</span>
-          <a href="/privacy" target="_blank" className="text-blue-500 hover:underline">
-            Privacy policy
-          </a>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
 
-export default SignUpPopUp;
+export default SignModal;

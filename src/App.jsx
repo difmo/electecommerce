@@ -15,6 +15,8 @@ import MainSlider from "./components/MainSlider";
 import Footer from "./components/Footer";
 import UserLayout from "./Layoutes/UserLayout";
 import AdminDashboard from "./Admin/dashboard/AdminDashboard";
+import LoginModal from "./pages/LoginPopUp";
+import SignUpPopUp from "./pages/SignUpPopUp";
 
 const App = () => {
   const [data, setData] = useState([...items]);
@@ -40,6 +42,15 @@ const App = () => {
             <Route
               path="/cart"
               element={<Cart cart={cart} setCart={setCart} />}
+            />
+
+            <Route
+              path="/loginmodel"
+              element={<LoginModal/>}
+            />
+            <Route
+              path="/signupmodel"
+              element={<SignUpPopUp/>}
             />
           </Route>
 

@@ -1,59 +1,80 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion"; // Import Framer Motion for animations
-import { FaGoogle, FaFacebook } from "react-icons/fa"; // Import icons for Google and Facebook
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup"; // Yup for validation
+import CustomInput from "../components/ReusableComponent/CustomInput";
+import CustomButton from "../components/ReusableComponent/CustomButton";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const LoginModal = ({ closeModal }) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const modalRef = useRef(null); // Reference to the modal container
+  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Close modal when clicking outside
+  // Formik form validation schema using Yup
+  const validationSchema = Yup.object({
+    email: Yup.string().email("Invalid email address").required("Email is required"),
+    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  });
+
+  // Formik hook for managing form state and validation
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      setLoading(true);
+      setErrorMessage(""); 
+      setSuccessMessage(""); 
+
+      try {
+        const auth = getAuth();
+        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+
+        if (user) {
+          if (user.emailVerified) {
+            setSuccessMessage("Login successful!");
+            navigate("/dashboard"); 
+          } else {
+            setErrorMessage("Please verify your email address before logging in.");
+          }
+        }
+      } catch (error) {
+        setErrorMessage(error.message); 
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
+
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
-        closeModal(); // Close modal if clicked outside
+      if (e.target === e.currentTarget) {
+        closeModal();
       }
     };
 
-    // Add event listener for outside click
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [closeModal]);
 
-  const handlePhoneNumberChange = (e) => {
-    setPhoneNumber(e.target.value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Logging in with phone number:", phoneNumber);
-    closeModal(); 
-  };
-
-  const handleGoogleLogin = () => {
-    console.log("Logging in with Google...");
-    closeModal();
-  };
-
-  const handleFacebookLogin = () => {
-    console.log("Logging in with Facebook...");
-    closeModal();
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-600 bg-opacity-50">
       <motion.div
-        ref={modalRef}
         className="relative p-6 bg-white rounded-lg shadow-md w-96"
-        initial={{ opacity: 0, y: -50 }} 
-        animate={{ opacity: 1, y: 0 }} 
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.3 }} 
+        transition={{ duration: 0.3 }}
       >
-        {/* Close Button (Cross icon) */}
         <button
           onClick={closeModal}
           className="absolute text-gray-500 top-2 right-2 hover:text-gray-800"
@@ -76,52 +97,48 @@ const LoginModal = ({ closeModal }) => {
 
         <h2 className="mb-4 text-xl font-bold">Login</h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={formik.handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-2">Phone Number</label>
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              placeholder="Enter your Phone Number"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
+            <CustomInput
+              type="email"
+              placeholder="Enter your email"
+              value={formik.values.email}
+              onChange={formik.handleChange("email")}
+              onBlur={formik.handleBlur("email")}
             />
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-red-500">{formik.errors.email}</p>
+            )}
+
+            <CustomInput
+              type="password"
+              placeholder="Enter your password"
+              value={formik.values.password}
+              onChange={formik.handleChange("password")}
+              onBlur={formik.handleBlur("password")}
+            />
+            {formik.touched.password && formik.errors.password && (
+              <p className="text-red-500">{formik.errors.password}</p>
+            )}
           </div>
 
-          <button
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+          {successMessage && <p className="text-green-500">{successMessage}</p>}
+
+          <CustomButton
             type="submit"
-            className="w-full px-4 py-2 text-white rounded-md bg-maincolor"
-          >
-            Continue
-          </button>
+            btntitle={loading ? "Logging in..." : "Login"}
+            disabled={loading}
+          />
         </form>
 
-        {/* Social login options */}
-        <div className="mt-4 space-y-4">
-          <button
-            onClick={handleGoogleLogin}
-            className="flex items-center justify-center w-full px-4 py-2 space-x-2 text-white bg-red-600 rounded-md"
-          >
-            <FaGoogle className="w-5 h-5 text-white" />
-            <span>Login with Google</span>
-          </button>
-          <button
-            onClick={handleFacebookLogin}
-            className="flex items-center justify-center w-full px-4 py-2 space-x-2 text-white bg-blue-600 rounded-md"
-          >
-            <FaFacebook className="w-5 h-5 text-white" />
-            <span>Login with Facebook</span>
-          </button>
-        </div>
-
         <div className="mt-4 text-center">
-          <button
-            onClick={closeModal}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            Cancel
-          </button>
+          <CustomButton
+            onClick={() => {
+              console.log("Redirect to Google login"); 
+            }}
+            btntitle="Login With Google"
+          />
         </div>
       </motion.div>
     </div>

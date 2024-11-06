@@ -67,7 +67,7 @@ const ProductDetail = ({ cart, setCart }) => {
         <div className="text-center">
           <h1 className="card-title">{product.title}</h1>
           <p className="card-text">{product.description}</p>
-          <button className="btn btn-primary mx-3">{product.price} ₹</button>
+          <button className="mx-3 btn btn-primary">{product.price} ₹</button>
           <button
             onClick={() =>
               addToCart(
@@ -84,8 +84,6 @@ const ProductDetail = ({ cart, setCart }) => {
           </button>
         </div>
       </div>
-      <h1 className="text-center">Related Products</h1>
-      <Product cart={cart} setCart={setCart} items={relatedProducts} />
     </>
   );
 };
