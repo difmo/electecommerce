@@ -43,56 +43,51 @@ const Product = ({ items, cart, setCart }) => {
         theme="dark"
       />
       <MainSlider />
-      <div className="container my-5">
+      <div className="container justify-center py-4">
         <div className="row">
-          {items.map((product) => {
-            return (
-              <>
-                <div
-                  key={product.id}
-                  className="col-lg-4 col-md-6 my-3 text-center"
+          {items.map((product) => (
+            <div
+              key={product.id}
+              className="col-lg-3 col-md-4 col-sm-6 col-12 py-3 text-center"
+            >
+              <div className="shadow-xl hover:shadow-2xl ">
+                <Link
+                  to={`/product/${product.id}`}
+                  className="d-flex justify-content-center align-items-center"
                 >
-                  <div className="card" style={{ width: "18rem" }}>
-                    <Link
-                      to={`/product/${product.id}`}
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        src={product.imgSrc}
-                        className="card-img-top"
-                        alt="..."
-                      />
-                    </Link>
-                    <div className="card-body">
-                      <h5 className="card-title">{product.title}</h5>
-                      <p className="card-text">{product.description}</p>
-                      <button className="btn btn-primary mx-3">
-                        {product.price} ₹
-                      </button>
-                      <button
-                        onClick={() =>
-                          addToCart(
-                            product.id,
-                            product.price,
-                            product.title,
-                            product.description,
-                            product.imgSrc
-                          )
-                        }
-                        className="btn btn-warning"
-                      >
-                        Add To Cart
-                      </button>
-                    </div>
-                  </div>
+                  <img
+                    src={product.imgSrc}
+                    className="card-img-top  img-fluid"
+                    alt={product.title}
+                    style={{ objectFit: "cover", height: "" }}
+                  />
+                </Link>
+                <div className="card-body py-3">
+                  <button className="btn  mx-3">{product.price} ₹</button>
+                  <button
+                    onClick={() =>
+                      addToCart(
+                        product.id,
+                        product.price,
+                        product.title,
+                        product.description,
+                        product.imgSrc
+                      )
+                    }
+                    className=" btn bg-greenbutten "
+                  >
+                    Add To Cart
+                  </button>
+                  <h5 className="card-title p-2 font-bold text-xl ">
+                    {product.title}
+                  </h5>
+                  <p className="card-text font-sans p-2">
+                    {product.description}
+                  </p>
                 </div>
-              </>
-            );
-          })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>

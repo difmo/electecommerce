@@ -78,14 +78,14 @@ const ProductDetail = ({ cart, setCart }) => {
                 product.imgSrc
               )
             }
-            className="btn btn-warning"
+            className="bg-greenbutten"
           >
             Add To Cart
           </button>
         </div>
       </div>
-      <h1 className="text-center">Related Products</h1>
-      <Product cart={cart} setCart={setCart} items={relatedProducts} />
+      {/* <h1 className="text-center">Related Products</h1> */}
+      {/* <Product cart={cart} setCart={setCart} items={relatedProducts} /> */}
     </>
   );
 };
