@@ -66,11 +66,11 @@ const ProductDetail = ({ cart, setCart }) => {
         theme="dark"
       />
 
-      <div className="flex">
-        <div className="flex">
+      <div className="flex ">
+        <div className="flex ">
           <div>
             {images.map((src, index) => (
-              <div key={index} className="w-16 h-20 m-3">
+              <div key={index} className="w-16 pt-5 ml-5">
                 <button className="focus:outline-none focus:ring-2 ring-blue-500">
                   <img
                     src={src}
@@ -81,11 +81,14 @@ const ProductDetail = ({ cart, setCart }) => {
               </div>
             ))}
           </div>
-
-          <img src={product.imgSrc} className="mt-0 w-full bg-cover" alt="" />
+          <div className="border-1 border-gray-500 h-[500px] w-[500px] my-10">
+            <img src={product.imgSrc} className=" w-full bg-cover " alt="" />
+          </div>
         </div>
-        <div className="text-center w-full  self-center ">
-          <h1 className="card-title font-bold text-xl py-2">{product.title}</h1>
+        <div className="text-center w-full pt-28  ">
+          <h1 className="card-title text-2xl break-words py-2">
+            {product.title}
+          </h1>
           <span className="mx-3 btn ">{product.price} ₹</span>
           <button
             onClick={() =>
@@ -101,7 +104,7 @@ const ProductDetail = ({ cart, setCart }) => {
           >
             Add To Cart
           </button>
-          <p className="card-text">{product.description}</p>
+          <p className="card-text break-words px-20">{product.description}</p>
         </div>
       </div>
     </>

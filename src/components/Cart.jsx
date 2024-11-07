@@ -31,7 +31,7 @@ const Cart = ({ cart, setCart }) => {
                       <div className="card-body text-center">
                         <h5 className="card-title">{product.title}</h5>
                         <p className="card-text">{product.description}</p>
-                        <button className=" mx-3">{product.price} ₹</button>
+                        <span className=" mx-3">{product.price} ₹</span>
                         <button className="btn bg-greenbutten">Buy Now</button>
                       </div>
                     </div>

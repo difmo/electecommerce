@@ -63,7 +63,7 @@ const Product = ({ items, cart, setCart }) => {
                   />
                 </Link>
                 <div className="card-body py-3">
-                  <button className="btn  mx-3">{product.price} ₹</button>
+                  <span className="btn  mx-3">{product.price} ₹</span>
                   <button
                     onClick={() =>
                       addToCart(
@@ -78,10 +78,10 @@ const Product = ({ items, cart, setCart }) => {
                   >
                     Add To Cart
                   </button>
-                  <h5 className="card-title p-2 font-bold text-xl ">
+                  <h5 className="card-title p-2 text-2xl break-words">
                     {product.title}
                   </h5>
-                  <p className="card-text font-sans p-2">
+                  <p className="card-text break-words p-2">
                     {product.description}
                   </p>
                 </div>
