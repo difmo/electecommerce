@@ -1,8 +1,9 @@
 import React from "react";
 
-const CustomInput = ({name,type,value,onChange,placeholder,onBlur,error}) => {
+const CustomInput = ({title,name,type,value,onChange,placeholder,onBlur,error}) => {
   return (
     <div>
+      <label>{title}</label>
       <input
       name={name}
         type={type}

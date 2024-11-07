@@ -1,8 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
-import { getStorage } from "firebase/storage"; // Correct import for Firebase Storage
-
+import { getFirestore, collection, getDocs,query,where,onSnapshot, getDoc,addDoc,deleteDoc,doc,updateDoc, arrayUnion } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; 
 const firebaseConfig = {
   apiKey: "AIzaSyBCsL0nEvyQxScMlw5FDsfs7UuTKopdOAo",
   authDomain: "tokengenerator-85ccb.firebaseapp.com",
@@ -13,16 +12,8 @@ const firebaseConfig = {
   measurementId: "G-WV01Q7TD2W"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Auth
 const auth = getAuth(app);
-
-// Initialize Firestore
 const db = getFirestore(app);
-
-// Initialize Firebase Storage
 const storage = getStorage(app);
-
-export { auth, db, storage ,collection, getDocs, addDoc};
+export { auth, db, storage ,collection,getDoc,onSnapshot, where,query,getDocs, addDoc,deleteDoc,doc,updateDoc,arrayUnion};

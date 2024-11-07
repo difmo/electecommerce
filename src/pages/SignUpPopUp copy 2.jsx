@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useFormik } from "formik";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import CustomInput from "../components/ReusableComponent/CustomInput";
 import CustomButton from "../components/ReusableComponent/CustomButton";
 import { useNavigate } from "react-router-dom";
@@ -69,9 +69,18 @@ const SignModal = ({ closeModal, switchToSignUp }) => {
         const user = userCredential.user;
 
         if (user) {
-          await sendEmailVerification(user); // Send email verification
+          await sendEmailVerification(user);
           setSuccessMessage("Verification email sent! Please check your inbox.");
-          
+
+          const userRef = doc(db, "users", user.uid);
+          await setDoc(userRef, {
+            uid: user.uid,      
+            email: user.email,   
+            createdAt: serverTimestamp(), 
+          });
+
+          setSuccessMessage("User added to Firestore!");
+
           // Wait for email verification before proceeding
           waitForEmailVerification(user);
         } else {

@@ -1,20 +1,26 @@
-import React, { useState } from 'react';
-import { db, storage } from '../../firebase'; // Firebase imports
-import { v4 as uuidv4 } from 'uuid'; // For unique product IDs
-import { AiOutlineUpload, AiOutlineCheckCircle } from 'react-icons/ai'; // React Icons
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Correct import for Firebase Storage
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // Import required Firestore functions
+import React, { useState, useEffect, useRef } from "react";
+import { db, storage } from "../../firebase";
+import { v4 as uuidv4 } from "uuid";
+import {
+  AiOutlineUpload,
+  AiOutlineCheckCircle,
+  AiOutlineClose,
+} from "react-icons/ai";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from "firebase/firestore";
+import CustomInput from "../../components/ReusableComponent/CustomInput";
 
-const AdditemForm = ({ closeForm }) => {
+const AdditemForm = ({ closeForm, itemToEdit, fetchItems }) => {
   const [productDetails, setProductDetails] = useState({
-    category: '',
-    title: '',
-    description: '',
-    price: '',
-    amazonLink: '',
+    title: itemToEdit?.title || "",
+    description: itemToEdit?.description || "",
+    shortDescription: itemToEdit?.shortDescription || "", // New short description field
+    price: itemToEdit?.price || "",
   });
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(itemToEdit?.images || []);
   const [isUploading, setIsUploading] = useState(false);
+
+  const formRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,125 +40,117 @@ const AdditemForm = ({ closeForm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!productDetails.title || !productDetails.price || images.length === 0) {
-      alert('Please fill out all fields and upload images.');
+      alert("Please fill out all fields and upload images.");
       return;
     }
 
     setIsUploading(true);
-
     const imageURLs = [];
+
     try {
-      // Upload images to Firebase Storage
-      for (const image of images) {
-        const imageRef = ref(storage, `images/${uuidv4()}-${image.name}`);
-        await uploadBytes(imageRef, image);
-        const imageURL = await getDownloadURL(imageRef);
-        imageURLs.push(imageURL);
+      // If editing, update the existing item
+      if (itemToEdit) {
+        if (images.length > 0) {
+          // Upload new images only if new images are added
+          for (const image of images) {
+            const imageRef = ref(storage, `images/${uuidv4()}-${image.name}`);
+            await uploadBytes(imageRef, image);
+            const imageURL = await getDownloadURL(imageRef);
+            imageURLs.push(imageURL);
+          }
+        }
+        const updatedProductData = {
+          ...productDetails,
+          images: imageURLs.length > 0 ? imageURLs : itemToEdit.images, // Keep old images if none are uploaded
+        };
+
+        const productRef = doc(db, "items", itemToEdit.id);
+        await updateDoc(productRef, updatedProductData);
+        alert("Product updated successfully!");
+      } else {
+        // Add new product
+        for (const image of images) {
+          const imageRef = ref(storage, `images/${uuidv4()}-${image.name}`);
+          await uploadBytes(imageRef, image);
+          const imageURL = await getDownloadURL(imageRef);
+          imageURLs.push(imageURL);
+        }
+
+        const productId = uuidv4();
+        const productData = {
+          ...productDetails,
+          images: imageURLs,
+          productId,
+          timestamp: serverTimestamp(),
+        };
+
+        await addDoc(collection(db, "items"), productData);
+        alert("Product added successfully!");
       }
 
-      // Save product data in Firestore
-      const productId = uuidv4();
-      const productData = {
-        ...productDetails,
-        images: imageURLs,
-        productId,
-        timestamp: serverTimestamp(), // Use serverTimestamp()
-      };
-
-      // Add product data to Firestore collection
-      await addDoc(collection(db, 'items'), productData);
-
-      alert('Product added successfully!');
       setProductDetails({
-        category: '',
-        title: '',
-        description: '',
-        price: '',
-        amazonLink: '',
+        title: "",
+        description: "",
+        shortDescription: "",
+        price: "",
       });
       setImages([]);
-      closeForm(); // Close the form after success
+      closeForm();
+      fetchItems(); 
     } catch (error) {
-      console.error('Error adding product: ', error);
-      alert('Error adding product!');
+      console.error("Error submitting form: ", error);
+      alert("Error submitting form.");
     }
+
     setIsUploading(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (formRef.current && !formRef.current.contains(e.target)) {
+        closeForm();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [closeForm]);
+
+  const fields = [
+    { title: "Title", name: "title", type: "text", placeholder: "Enter product title" },
+    { title: "Description", name: "description", type: "text", placeholder: "Enter product description" },
+    { title: "Short Description", name: "shortDescription", type: "text", placeholder: "Enter short description" }, // Short Description field
+    { title: "Price", name: "price", type: "number", placeholder: "Enter product price" },
+  ];
+
   return (
-    <div className="w-full max-w-5xl p-8 mx-auto overflow-auto bg-white rounded-lg shadow-lg">
-      <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">Add New Product</h2>
+    <div ref={formRef} className="relative w-full max-w-5xl p-8 mx-auto overflow-auto bg-white rounded-lg shadow-lg">
+      <button onClick={() => closeForm()} className="absolute text-2xl text-gray-600 top-4 right-4 hover:text-gray-900">
+        <AiOutlineClose />
+      </button>
+
+      <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">
+        {itemToEdit ? "Edit Product" : "Add New Product"}
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title Input */}
-        <div className="mb-4">
-          <label htmlFor="title" className="block text-lg font-semibold text-gray-700">Title</label>
-          <input
-            type="text"
-            name="title"
-            id="title"
-            value={productDetails.title}
-            onChange={handleChange}
-            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
+        {fields.map((field) => (
+          <div key={field.name} className="w-full mb-4">
+            <CustomInput
+              title={field.title}
+              name={field.name}
+              type={field.type}
+              value={productDetails[field.name]}
+              onChange={handleChange}
+              placeholder={field.placeholder}
+            />
+          </div>
+        ))}
 
-        {/* Category Input */}
-        <div className="mb-4">
-          <label htmlFor="category" className="block text-lg font-semibold text-gray-700">Category</label>
-          <input
-            type="text"
-            name="category"
-            id="category"
-            value={productDetails.category}
-            onChange={handleChange}
-            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        {/* Description Input */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-lg font-semibold text-gray-700">Description</label>
-          <input
-            type="text"
-            name="description"
-            id="description"
-            value={productDetails.description}
-            onChange={handleChange}
-            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        {/* Price Input */}
-        <div className="mb-4">
-          <label htmlFor="price" className="block text-lg font-semibold text-gray-700">Price</label>
-          <input
-            type="number"
-            name="price"
-            id="price"
-            value={productDetails.price}
-            onChange={handleChange}
-            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-
-        {/* Amazon Link Input */}
-        <div className="mb-4">
-          <label htmlFor="amazonLink" className="block text-lg font-semibold text-gray-700">Amazon Link</label>
-          <input
-            type="url"
-            name="amazonLink"
-            id="amazonLink"
-            value={productDetails.amazonLink}
-            onChange={handleChange}
-            className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        {/* Image Upload */}
         <div className="mb-6">
-          <label htmlFor="images" className="block text-lg font-semibold text-gray-700">Select Images</label>
+          <label htmlFor="images" className="block text-lg font-semibold text-gray-700">
+            Select Images
+          </label>
           <input
             type="file"
             id="images"
@@ -162,11 +160,10 @@ const AdditemForm = ({ closeForm }) => {
           />
         </div>
 
-        {/* Submit Button */}
         <div className="flex justify-center mb-6">
           <button
             type="submit"
-            className={`py-2 px-4 rounded-lg text-white font-semibold ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} flex items-center justify-center space-x-2`}
+            className={`py-2 px-4 rounded-lg text-white font-semibold ${isUploading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} flex items-center justify-center space-x-2`}
             disabled={isUploading}
           >
             {isUploading ? (
@@ -175,7 +172,7 @@ const AdditemForm = ({ closeForm }) => {
               </>
             ) : (
               <>
-                <AiOutlineUpload /> <span>Add Product</span>
+                <AiOutlineUpload /> <span>{itemToEdit ? "Update Product" : "Add Product"}</span>
               </>
             )}
           </button>

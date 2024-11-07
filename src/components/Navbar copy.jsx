@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BsFillCartCheckFill } from "react-icons/bs";
 import LoginModal from "../pages/LoginPopUp";
 import SignUpPopUp from "../pages/SignUpPopUp";
@@ -7,23 +7,41 @@ import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 const Navbar = ({ setData, cart }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setSignUpModalOpen] = useState(false);
   const [user, setUser] = useState(null); // Track the current user
 
-  // Track auth state change
+  // Check for user authentication state change
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser && currentUser.emailVerified) {
-        setUser(currentUser); // User is authenticated and email verified
-      } else {
-        setUser(null); // User is not authenticated or not verified
-      }
-    });
+    try {
+      const user = userCredential.user;
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+      if (user) {
+        if (user.emailVerified) {
+          const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+          });
+          // closeModal();
+        } else {
+          console.log(
+            "Please verify your email address before logging in."
+          );
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      
+    }
+
+    // const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    //   setUser(currentUser);
+    // });
+
+    return () => unsubscribe(); // Clean up subscription on component unmount
   }, []);
 
   const handleSubmit = (e) => {
@@ -87,7 +105,7 @@ const Navbar = ({ setData, cart }) => {
                   Logout
                 </button>
                 <button
-                  onClick={() => navigate("/myorderspage")}
+                  onClick={() => navigate("myorderspage")}
                   className="px-4 py-2 transition duration-300 bg-white rounded-md text-maincolor hover:bg-blue-600"
                 >
                   My Orders

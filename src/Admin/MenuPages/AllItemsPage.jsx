@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { db, collection, getDocs } from "../../firebase";
-import { AiOutlinePlus } from "react-icons/ai";
+import { db, collection, getDocs, doc, deleteDoc } from "../../firebase";
+import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import AdditemForm from "./AdditemForm";
+import Slider from "react-slick";
 
 const AllItemsPage = () => {
   const [items, setItems] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
 
   const fetchItems = async () => {
     try {
@@ -19,6 +21,26 @@ const AllItemsPage = () => {
     } catch (error) {
       console.error("Error fetching items: ", error);
     }
+  };
+
+  const handleDelete = async (itemId) => {
+    try {
+      const itemRef = doc(db, "items", itemId);
+      await deleteDoc(itemRef);
+      setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    } catch (error) {
+      console.error("Error deleting item: ", error);
+    }
+  };
+
+  const handleEdit = (item) => {
+    setItemToEdit(item);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setItemToEdit(null); 
   };
 
   useEffect(() => {
@@ -36,36 +58,61 @@ const AllItemsPage = () => {
 
       <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
-          <div key={item.id} className="p-5 bg-white rounded-lg shadow-lg">
-            <img
-              src={item.imgSrc || "https://via.placeholder.com/150"}
-              alt={item.title}
-              className="object-cover w-full h-48 mb-4 rounded-md"
-            />
+          <div key={item.id} className="relative p-5 bg-white rounded-lg shadow-lg">
+            <div className="w-full h-48 mb-4">
+              <Slider
+                dots={true}
+                infinite={true}
+                speed={500}
+                slidesToShow={1}
+                slidesToScroll={1}
+              >
+                {(item.images ?? []).map((imgSrc, index) => (
+                  <div key={index}>
+                    <img
+                      src={imgSrc || "https://via.placeholder.com/150"}
+                      alt={item.title}
+                      className="object-cover w-full h-48 rounded-md"
+                    />
+                  </div>
+                ))}
+              </Slider>
+            </div>
+
             <h3 className="mb-2 text-xl font-semibold">{item.title}</h3>
+            <p className="mb-2 text-sm text-gray-500">{item.shortDescription}</p> {/* Short Description display */}
             <p className="mb-4 text-gray-700">{item.description}</p>
             <p className="font-bold text-gray-800">{`₹${item.price}`}</p>
-            <a
-              href={item.amazonLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              View on Amazon
-            </a>
+
+            {/* Edit and Delete Buttons */}
+            <div className="absolute flex space-x-2 top-2 right-2">
+              <button
+                onClick={() => handleEdit(item)}
+                className="p-2 text-blue-500 bg-white rounded-full shadow-md hover:bg-gray-100"
+              >
+                <AiOutlineEdit size={20} />
+              </button>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="p-2 text-red-500 bg-white rounded-full shadow-md hover:bg-gray-100"
+              >
+                <AiOutlineDelete size={20} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Modal for AdditemForm */}
       {showForm && (
         <div className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative w-[700px] max-h-[80vh] h-full bg-white rounded-lg shadow-lg m-12 overflow-hidden">
-            <div className="h-full p-8 overflow-y-auto">
-              <AdditemForm closeForm={() => setShowForm(false)} />
-            </div>
+          <div className="h-[600px] w-[800px] p-8 bg-white rounded-lg shadow-lg overflow-y-scroll">
+            <AdditemForm
+              closeForm={handleCloseForm}
+              itemToEdit={itemToEdit}
+              fetchItems={fetchItems}
+            />
           </div>
-        </div>  
+        </div>
       )}
     </div>
   );

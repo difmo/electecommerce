@@ -11,12 +11,12 @@ import ProductDetail from "./components/ProductDetail";
 import SearchItem from "./components/SearchItem";
 import Cart from "./components/Cart";
 import { items } from "./components/Data";
-import MainSlider from "./components/MainSlider";
-import Footer from "./components/Footer";
 import UserLayout from "./Layoutes/UserLayout";
 import AdminDashboard from "./Admin/dashboard/AdminSideMenu";
 import LoginModal from "./pages/LoginPopUp";
 import SignUpPopUp from "./pages/SignUpPopUp";
+import CheckoutPage from "./pages/CheckoutPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 
 const App = () => {
   const [data, setData] = useState([...items]);
@@ -52,6 +52,9 @@ const App = () => {
               path="/signupmodel"
               element={<SignUpPopUp/>}
             />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/myorderspage" element={<MyOrdersPage />} />
+
           </Route>
 
           <Route>
