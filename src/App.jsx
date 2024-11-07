@@ -14,7 +14,7 @@ import { items } from "./components/Data";
 import MainSlider from "./components/MainSlider";
 import Footer from "./components/Footer";
 import UserLayout from "./Layoutes/UserLayout";
-import AdminDashboard from "./Admin/dashboard/AdminDashboard";
+import AdminDashboard from "./Admin/dashboard/AdminSideMenu";
 import LoginModal from "./pages/LoginPopUp";
 import SignUpPopUp from "./pages/SignUpPopUp";
 
