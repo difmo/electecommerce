@@ -19,7 +19,6 @@ const LoginModal = ({ closeModal }) => {
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   });
 
-  // Formik hook for managing form state and validation
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -35,6 +34,8 @@ const LoginModal = ({ closeModal }) => {
         const auth = getAuth();
         const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
         const user = userCredential.user;
+
+      
 
         if (user) {
           if (user.emailVerified) {
