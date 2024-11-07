@@ -92,6 +92,12 @@ const Navbar = ({ setData, cart }) => {
                 >
                   My Orders
                 </button>
+                <button
+                  onClick={() => navigate("/admin")}
+                  className="px-4 py-2 transition duration-300 bg-white rounded-md text-maincolor hover:bg-blue-600"
+                >
+                 Admin
+                </button>
               </>
             )}
 
