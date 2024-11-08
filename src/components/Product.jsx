@@ -64,7 +64,7 @@ const Product = ({ cart, setCart }) => {
                 />
               </Link>
               <div className="p-2 card-body">
-                <button className="w-full text-sm bg-gray-200 btn text-maincolor">{product.price} ₹</button>
+                <button className="w-full text-sm bg-gray-200 btn text-maincolor">₹ {product.price}</button>
                 <button
                   onClick={() =>
                     addToCart(

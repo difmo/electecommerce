@@ -46,16 +46,16 @@ const ProductDetail = ({ cart, setCart }) => {
   return (
     <>
       <ToastContainer position="top-right" autoClose={1500} />
-      <div className="container px-5 py-10 mx-auto max-w-7xl">
-        <div className="flex flex-col gap-10 lg:flex-row">
+      <div className="container px-5 py-10 mx-auto">
+        <div className="flex flex-col gap-10 md:flex-row">
           {/* Image Thumbnails */}
-          <div className="flex flex-col gap-4 sm:flex-row lg:flex-col">
+          <div className="flex gap-4 md:flex-col md:gap-6 ">
             {product.images.map((src, index) => (
               <div
                 key={index}
-                className="w-16 h-20 mb-4 cursor-pointer"
-                onMouseEnter={() => setHoveredImage(src)}
-                onMouseLeave={() => setHoveredImage(product.images[0])}
+                className="w-16 h-20 cursor-pointer"
+                onMouseEnter={() => setHoveredImage(src)} 
+                onMouseLeave={() => setHoveredImage(product.images[0])} 
               >
                 <img
                   src={src}
@@ -66,19 +66,17 @@ const ProductDetail = ({ cart, setCart }) => {
             ))}
           </div>
 
-          {/* Main Image */}
-          <div className="flex flex-col items-center justify-center w-full p-4 border">
+          <div className="flex flex-col w-full p-4 border md:w-2/4">
             <img
-              src={hoveredImage || product.images[0]}
-              className="object-cover w-full transition-transform duration-300 transform rounded-lg h-96 sm:h-80 md:h-96 lg:h-96 xl:h-96 hover:scale-105"
+              src={hoveredImage || product.images[0]} 
+              className="object-cover w-full transition-transform duration-300 transform rounded-lg h-96 hover:scale-105"
               alt={product.title}
             />
           </div>
 
-          {/* Product Information */}
-          <div className="flex flex-col justify-center w-full text-center lg:text-left">
+          <div className="flex flex-col justify-center w-full text-center ">
             <h1 className="mb-4 text-3xl font-semibold text-gray-900">{product.title}</h1>
-            <div className="flex items-center justify-center mb-4 lg:justify-start">
+            <div className="flex items-center justify-center mb-4">
               <span className="text-2xl font-bold text-green-500">{product.price} ₹</span>
             </div>
             <p className="mt-6 text-lg text-gray-600">{product.description}</p>
@@ -87,7 +85,7 @@ const ProductDetail = ({ cart, setCart }) => {
               onClick={() =>
                 addToCart(product.id, product.price, product.title, product.description, product.images[0])
               }
-              className="w-full px-8 py-3 mt-6 text-white transition-all transform bg-green-500 rounded-lg shadow-md hover:bg-green-600 hover:scale-105 sm:w-auto"
+              className="px-8 py-3 text-white transition-all transform bg-green-500 rounded-lg shadow-md btn hover:bg-green-600 hover:scale-105"
             >
               Add To Cart
             </button>

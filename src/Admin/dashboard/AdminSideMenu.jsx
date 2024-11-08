@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AdminDashboard from "../MenuPages/AdminDashboard";
 import AllItemsPage from "../MenuPages/AllItemsPage";
 import AdminAllOrders from "../MenuPages/AdminAllOrders";
+import { AiOutlineDashboard, AiOutlineAppstoreAdd, AiOutlineShoppingCart } from "react-icons/ai"; // Import icons
 
 const AdminSideMenu = () => {
   const [currentView, setCurrentView] = useState("AdminDashboard");
@@ -37,15 +38,31 @@ const AdminSideMenu = () => {
       >
         <h2 className="mb-6 text-2xl font-bold text-center">Admin Menu</h2>
         <ul className="p-0 list-none">
-          {["Dashboard", "Items", "Orders"].map((item) => (
-            <li
-              key={item}
-              className="px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
-              onClick={() => handleMenuClick(item)}
-            >
-              {item}
-            </li>
-          ))}
+          {/* Menu items with icons */}
+          <li
+            key="Dashboard"
+            className="flex items-center px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
+            onClick={() => handleMenuClick("Dashboard")}
+          >
+            <AiOutlineDashboard size={20} className="mr-3" />
+            Dashboard
+          </li>
+          <li
+            key="Items"
+            className="flex items-center px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
+            onClick={() => handleMenuClick("Items")}
+          >
+            <AiOutlineAppstoreAdd size={20} className="mr-3" />
+            Items
+          </li>
+          <li
+            key="Orders"
+            className="flex items-center px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
+            onClick={() => handleMenuClick("Orders")}
+          >
+            <AiOutlineShoppingCart size={20} className="mr-3" />
+            Orders
+          </li>
         </ul>
       </div>
 
