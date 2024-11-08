@@ -142,7 +142,7 @@ const CheckoutPage = () => {
   const { subtotal, tax, deliveryCharge, total } = calculateTotal();
 
   return (
-    <div className="container px-4 py-8 mx-auto">
+    <div className="container px-4 py-8 mx-auto max-w-7xl">
       <h2 className="mb-5 text-2xl font-semibold text-gray-800">Checkout</h2>
       {!user ? (
         <div>Please log in to proceed to checkout</div>
@@ -169,7 +169,6 @@ const CheckoutPage = () => {
             ) : (
               <div>
                 <p>No address selected. Please choose one or add a new address.</p>
-                {/* Display 'Add Address' button if no address is selected */}
                 <button
                   onClick={() => setIsAddingAddress(true)}
                   className="px-6 py-2 mt-4 text-white bg-green-500 rounded-md"
@@ -198,7 +197,7 @@ const CheckoutPage = () => {
                       />
                       <div>
                         <p className="font-semibold">{product.title}</p>
-                        <p>{product.description}</p>
+                        <p>{product.shortDescription}</p>
                       </div>
                     </div>
                     <span className="text-lg font-semibold">{product.price} ₹</span>
@@ -341,7 +340,7 @@ const CheckoutPage = () => {
           {/* Checkout Button */}
           <button
             onClick={handleCreateOrder}
-            className="px-6 py-2 mt-5 text-white bg-yellow-500 rounded-md"
+            className="w-full px-6 py-2 mt-5 text-white bg-yellow-500 rounded-md sm:w-auto"
           >
             Place Order
           </button>

@@ -8,6 +8,7 @@ const AllItemsPage = () => {
   const [items, setItems] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
+  const [expandedDescription, setExpandedDescription] = useState(null); // Track expanded description
 
   const fetchItems = async () => {
     try {
@@ -43,15 +44,19 @@ const AllItemsPage = () => {
     setItemToEdit(null); 
   };
 
+  const handleToggleDescription = (itemId) => {
+    setExpandedDescription((prevId) => (prevId === itemId ? null : itemId));
+  };
+
   useEffect(() => {
     fetchItems();
   }, []);
 
   return (
-    <div className="min-h-screen p-10 bg-gray-100">
+    <div className="min-h-screen p-4 bg-gray-100 md:p-10">
       <button
         onClick={() => setShowForm(true)}
-        className="fixed p-4 text-white transition bg-blue-500 rounded-full shadow-lg bottom-5 right-5 hover:bg-blue-700"
+        className="fixed z-20 p-4 text-white transition bg-blue-500 rounded-full shadow-lg bottom-5 right-5 hover:bg-blue-700"
       >
         <AiOutlinePlus size={24} />
       </button>
@@ -80,12 +85,23 @@ const AllItemsPage = () => {
             </div>
 
             <h3 className="mb-2 text-xl font-semibold">{item.title}</h3>
-            <p className="mb-2 text-sm text-gray-500">{item.shortDescription}</p> {/* Short Description display */}
-            <p className="mb-4 text-gray-700">{item.description}</p>
+            
+            {/* Short Description with Toggle */}
+            <p 
+              className={`mb-2 text-sm text-gray-500 ${expandedDescription === item.id ? "line-clamp-none" : "line-clamp-1"}`}
+              onClick={() => handleToggleDescription(item.id)} 
+              style={{cursor: "pointer"}}
+            >
+              {item.shortDescription}
+              <span className="text-blue-500">{expandedDescription === item.id ? " Less" : " ...More"}</span>
+            </p>
+            
+            <p className={`mb-4 text-gray-700 ${expandedDescription === item.id ? "" : "hidden"}`}>{item.description}</p>
+            
             <p className="font-bold text-gray-800">{`₹${item.price}`}</p>
 
             {/* Edit and Delete Buttons */}
-            <div className="absolute flex space-x-2 top-2 right-2">
+            <div className="absolute flex space-x-2 top-2 right-2 ">
               <button
                 onClick={() => handleEdit(item)}
                 className="p-2 text-blue-500 bg-white rounded-full shadow-md hover:bg-gray-100"

@@ -17,6 +17,7 @@ const CheckoutPage = () => {
     phone: "",
   });
   const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [isAddingNewAddressForm, setIsAddingNewAddressForm] = useState(false); // State for toggling address form
   const [cart, setCart] = useState(location.state?.cart || []); 
 
   useEffect(() => {
@@ -34,7 +35,8 @@ const CheckoutPage = () => {
       const userRef = doc(db, "users", uid);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
-        setAddresses(userDoc.data().addresses || []);
+        const userAddresses = userDoc.data().addresses || [];
+        setAddresses(userAddresses);
         const userSelectedAddress = userDoc.data().selectedAddress;
         if (userSelectedAddress) {
           setSelectedAddress(userSelectedAddress);
@@ -64,12 +66,16 @@ const CheckoutPage = () => {
     }
 
     const userRef = doc(db, "users", user.uid);
+    const newAddressWithSelected = { ...newAddress, isSelected: false };
+
     try {
+      // Update the user document in Firestore with the new address
       await updateDoc(userRef, {
-        addresses: arrayUnion(newAddress), 
+        addresses: arrayUnion(newAddressWithSelected),
       });
-      setAddresses([...addresses, newAddress]); 
-      setIsAddingAddress(false); 
+
+      setAddresses((prevAddresses) => [...prevAddresses, newAddressWithSelected]);
+      setIsAddingNewAddressForm(false); // Close the form after adding the address
     } catch (error) {
       console.error("Error adding address:", error);
     }
@@ -83,12 +89,13 @@ const CheckoutPage = () => {
         : { ...addr, isSelected: false }
     );
     setAddresses(updatedAddresses);
+
+    // Update the user document in Firestore to set the selected address
     const userRef = doc(db, "users", user.uid);
     updateDoc(userRef, {
       selectedAddress: address,
-      addresses: updatedAddresses, 
+      addresses: updatedAddresses, // Make sure the updated list is saved
     });
-    setIsAddingAddress(false); 
   };
 
   const handleCreateOrder = async () => {
@@ -109,8 +116,7 @@ const CheckoutPage = () => {
     try {
       const ordersRef = collection(db, "orders");
       await addDoc(ordersRef, orderData);
-      
-      navigate("/");
+      navigate("/");  // Navigate to homepage after order creation
     } catch (error) {
       console.error("Error creating order:", error);
     }
@@ -161,7 +167,16 @@ const CheckoutPage = () => {
                 </button>
               </div>
             ) : (
-              <p>No address selected. Please choose one or add a new address.</p>
+              <div>
+                <p>No address selected. Please choose one or add a new address.</p>
+                {/* Display 'Add Address' button if no address is selected */}
+                <button
+                  onClick={() => setIsAddingAddress(true)}
+                  className="px-6 py-2 mt-4 text-white bg-green-500 rounded-md"
+                >
+                  Add Address
+                </button>
+              </div>
             )}
           </div>
 
@@ -215,41 +230,110 @@ const CheckoutPage = () => {
           {isAddingAddress && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
               <div className="w-full max-w-md p-6 bg-white rounded-md shadow-md">
-                <h4 className="mb-4 text-lg font-semibold">Select or Add a New Address</h4>
-                <div className="mb-4">
-                  <h5 className="text-lg font-semibold">Your Addresses</h5>
-                  {addresses.length > 0 ? (
-                    <ul>
-                      {addresses.map((address, index) => (
-                        <li
-                          key={index}
-                          className="p-2 mb-2 bg-gray-100 rounded-md cursor-pointer hover:bg-gray-200"
-                          onClick={() => handleSelectAddress(address)}
-                        >
-                          <p className="font-semibold">{address.name}</p>
-                          <p>{address.street}</p>
-                          <p>{address.city}, {address.state}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No addresses available.</p>
-                  )}
-                  <button
-                    onClick={() => setIsAddingAddress(false)}
-                    className="px-4 py-2 mt-4 text-white bg-gray-500 rounded-md"
-                  >
-                    Close
-                  </button>
-                </div>
-                <div className="mt-4">
-                  <button
-                    onClick={() => setIsAddingAddress(false)}
-                    className="px-6 py-2 text-white bg-blue-500 rounded-md"
-                  >
-                    Add a New Address
-                  </button>
-                </div>
+                <h4 className="mb-4 text-lg font-semibold">Add or Select Address</h4>
+                {isAddingNewAddressForm ? (
+                  <div className="mb-4">
+                    <h5 className="text-lg font-semibold">New Address</h5>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Full Name"
+                        value={newAddress.name}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <input
+                        type="text"
+                        name="street"
+                        placeholder="Street Address"
+                        value={newAddress.street}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="City"
+                        value={newAddress.city}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <input
+                        type="text"
+                        name="state"
+                        placeholder="State"
+                        value={newAddress.state}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <input
+                        type="text"
+                        name="postalCode"
+                        placeholder="Postal Code"
+                        value={newAddress.postalCode}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <input
+                        type="text"
+                        name="phone"
+                        placeholder="Phone Number"
+                        value={newAddress.phone}
+                        onChange={handleAddressInputChange}
+                        className="w-full p-2 mb-3 border"
+                      />
+                      <button
+                        onClick={handleAddNewAddress}
+                        className="w-full px-6 py-2 text-white bg-green-500 rounded-md"
+                      >
+                        Save Address
+                      </button>
+                    </form>
+                    <button
+                      onClick={() => setIsAddingNewAddressForm(false)}
+                      className="w-full px-6 py-2 mt-3 text-white bg-gray-500 rounded-md"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mb-4">
+                    <h5 className="text-lg font-semibold">Your Addresses</h5>
+                    {addresses.length > 0 ? (
+                      <ul>
+                        {addresses.map((address, index) => (
+                          <li
+                            key={index}
+                            className="p-2 mb-2 bg-gray-100 rounded-md cursor-pointer hover:bg-gray-200"
+                            onClick={() => handleSelectAddress(address)}
+                          >
+                            <p className="font-semibold">{address.name}</p>
+                            <p>{address.street}</p>
+                            <p>{address.city}, {address.state}</p>
+                            {address.isSelected && (
+                              <span className="text-sm text-green-500">Selected</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No addresses available.</p>
+                    )}
+                    <button
+                      onClick={() => setIsAddingNewAddressForm(true)} 
+                      className="w-full px-6 py-2 mt-4 text-white bg-blue-500 rounded-md"
+                    >
+                      Add a New Address
+                    </button>
+                    <button
+                      onClick={() => setIsAddingAddress(false)}
+                      className="w-full px-6 py-2 mt-4 text-white bg-gray-500 rounded-md"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

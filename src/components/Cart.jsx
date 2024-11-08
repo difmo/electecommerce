@@ -29,66 +29,57 @@ const Cart = ({ cart, setCart }) => {
   const { subtotal, tax, deliveryCharge, total } = calculateTotal();
 
   return (
-    <div className="container my-5" style={{ width: "80%" }}>
+    <div className="container px-4 mx-auto my-5 sm:px-6 lg:px-8">
       {cart.length === 0 ? (
         <div className="text-center">
           <h1 className="mb-4 text-2xl font-semibold text-gray-800">Your Cart is Empty</h1>
-          <Link to="/" className="text-white btn bg-greenbutten">
+          <Link to="/" className="px-6 py-2 text-white rounded-lg btn bg-greenbutten">
             Continue Shopping...
           </Link>
         </div>
       ) : (
-        cart.map((product) => (
-          <div key={product.id} className="my-5 mb-3 rounded-lg shadow-lg card" style={{ width: "100%" }}>
-            <div className="row g-0">
-              <div className="col-md-4">
+        <div>
+          <ul className="space-y-4">
+            {cart.map((product) => (
+              <li key={product.id} className="flex items-center p-4 bg-white rounded-lg shadow-md">
                 <img
                   src={product.imgSrc}
-                  className="img-fluid rounded-start"
                   alt={product.title}
-                  style={{ objectFit: "cover", height: "150px" }}
+                  className="object-cover w-20 h-20 mr-4 rounded-lg"
                 />
-              </div>
-              <div className="col-md-8">
-                <div className="card-body">
-                  <h5 className="text-lg font-bold text-gray-900 card-title">{product.title}</h5>
-                  <p className="text-gray-700 card-text">{product.description}</p>
-                  <div className="mt-4 d-flex justify-content-between align-items-center">
-                    <button className="btn btn-outline-secondary">
-                      {product.price} ₹
-                    </button>
+                <div className="flex-1">
+                  <h5 className="text-lg font-semibold text-gray-900">{product.title}</h5>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="font-semibold text-gray-700">{product.price} ₹</span>
                     <button
-                      className="btn btn-danger"
                       onClick={() => removeFromCart(product.id)} // Remove from cart
+                      className="text-sm text-red-600 hover:text-red-800"
                     >
-                      Remove Item
+                      Remove
                     </button>
                   </div>
-                  <Link to="/checkout" state={{ cart }} className="mt-3 text-white btn bg-greenbutten">
-                    Buy Now
-                  </Link>
                 </div>
-              </div>
-            </div>
-          </div>
-        ))
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {cart.length !== 0 && (
-        <div className="container my-5 text-center">
-          <div className="mb-4 d-flex justify-content-between">
+        <div className="mt-6">
+          <div className="flex flex-col justify-between mb-6 sm:flex-row">
             <div className="flex flex-col text-left">
               <h5 className="text-lg font-semibold text-gray-700">Order Summary</h5>
               <div className="mt-2">
-                <div className="d-flex justify-content-between">
+                <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>{subtotal} ₹</span>
                 </div>
-                <div className="d-flex justify-content-between">
+                <div className="flex justify-between">
                   <span>Tax (10%):</span>
                   <span>{tax.toFixed(2)} ₹</span>
                 </div>
-                <div className="d-flex justify-content-between">
+                <div className="flex justify-between">
                   <span>Delivery Charge:</span>
                   <span>{deliveryCharge} ₹</span>
                 </div>
@@ -96,22 +87,22 @@ const Cart = ({ cart, setCart }) => {
             </div>
             <div className="flex flex-col text-right">
               <h5 className="text-lg font-semibold text-gray-700">Total</h5>
-              <div className="d-flex justify-content-between">
+              <div className="flex justify-between">
                 <span>Total Amount:</span>
                 <span className="text-xl font-bold text-green-500">{total.toFixed(2)} ₹</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-5 d-flex justify-content-center">
-            <Link to="/checkout" state={{ cart }}>
-              <button className="px-4 py-2 mx-5 rounded-lg shadow-lg btn btn-warning">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <Link to="/checkout" state={{ cart }} className="w-full sm:w-auto">
+              <button className="w-full px-6 py-3 rounded-lg shadow-lg sm:w-auto btn btn-warning">
                 Proceed to Checkout
               </button>
             </Link>
             <button
               onClick={clearCart}
-              className="px-4 py-2 rounded-lg shadow-lg btn btn-danger"
+              className="w-full px-6 py-3 rounded-lg shadow-lg sm:w-auto btn btn-danger"
             >
               Clear Cart
             </button>

@@ -1,45 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { db, collection, getDocs, doc, updateDoc } from "../../firebase"; 
+import { db, collection, doc, updateDoc, onSnapshot } from "../../firebase"; // Using onSnapshot for real-time updates
 
 const AdminAllOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState("live"); 
+  const [activeTab, setActiveTab] = useState("live");
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const ordersRef = collection(db, "orders");
-        let querySnapshot;
+    const ordersRef = collection(db, "orders");
 
-        if (filter) {
-          querySnapshot = await getDocs(ordersRef);
-        }
+    const unsubscribe = onSnapshot(ordersRef, (querySnapshot) => {
+      const fetchedOrders = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log("Fetched Orders:", fetchedOrders);
 
-        console.log(querySnapshot);
+      const filteredOrders = fetchedOrders.filter(
+        (order) => order.status.toLowerCase() === activeTab.toLowerCase()
+      );
 
-        const fetchedOrders = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log(fetchedOrders);  
-        setOrders(fetchedOrders); 
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
+      setOrders(filteredOrders);
+    });
 
-    fetchOrders();
-  }, [filter]);
+    return () => unsubscribe();
+  }, [activeTab]);
 
   const handleStatusChange = async (orderId, newStatus) => {
+    // Confirm action before updating
+    const isConfirmed = window.confirm(`Are you sure you want to mark this order as ${newStatus}?`);
+    if (!isConfirmed) return;
+
     try {
       const orderRef = doc(db, "orders", orderId);
       await updateDoc(orderRef, { status: newStatus });
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      console.log(`Order ${orderId} status updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating order status:", error);
     }
@@ -49,18 +43,35 @@ const AdminAllOrders = () => {
     <div className="container px-4 py-8 mx-auto">
       <h2 className="mb-6 text-3xl font-semibold text-gray-800">Admin Orders</h2>
 
-      <div className="mb-6">
-        <button onClick={() => setFilter("live")} className="px-4 py-2 mr-4 text-white transition-all bg-blue-500 rounded-lg hover:bg-blue-600">
+      {/* Tab Bar */}
+      <div className="flex mb-6 space-x-4 border-b-2 border-gray-200">
+        <button
+          onClick={() => setActiveTab("live")}
+          className={`px-4 py-2 text-lg font-semibold rounded-lg ${
+            activeTab === "live" ? "bg-blue-500 text-white" : "text-blue-500"
+          } transition-all`}
+        >
           Live Orders
         </button>
-        <button onClick={() => setFilter("ongoing")} className="px-4 py-2 mr-4 text-white transition-all bg-yellow-500 rounded-lg hover:bg-yellow-600">
+        <button
+          onClick={() => setActiveTab("ongoing")}
+          className={`px-4 py-2 text-lg font-semibold rounded-lg ${
+            activeTab === "ongoing" ? "bg-yellow-500 text-white" : "text-yellow-500"
+          } transition-all`}
+        >
           Ongoing Orders
         </button>
-        <button onClick={() => setFilter("done")} className="px-4 py-2 text-white transition-all bg-green-500 rounded-lg hover:bg-green-600">
+        <button
+          onClick={() => setActiveTab("completed")}
+          className={`px-4 py-2 text-lg font-semibold rounded-lg ${
+            activeTab === "completed" ? "bg-green-500 text-white" : "text-green-500"
+          } transition-all`}
+        >
           Completed Orders
         </button>
       </div>
 
+      {/* Display Orders */}
       {orders.length > 0 ? (
         <div>
           {orders.map((order) => (
@@ -69,14 +80,17 @@ const AdminAllOrders = () => {
               className="p-6 mb-6 transition-all bg-white shadow-lg rounded-xl hover:shadow-xl"
             >
               <h3 className="text-xl font-semibold text-gray-800">Order ID: {order.id}</h3>
-              <p className="text-sm text-gray-600">Status: <span className="font-semibold text-gray-900">{order.status}</span></p>
+              <p className="text-sm text-gray-600">
+                Status: <span className="font-semibold text-gray-900">{order.status}</span>
+              </p>
 
               <div className="mt-4">
                 <h4 className="font-semibold text-gray-700">Shipping Address</h4>
                 <p>{order.selectedAddress.name}</p>
                 <p>{order.selectedAddress.street}</p>
                 <p>
-                  {order.selectedAddress.city}, {order.selectedAddress.state} {order.selectedAddress.postalCode}
+                  {order.selectedAddress.city}, {order.selectedAddress.state}{" "}
+                  {order.selectedAddress.postalCode}
                 </p>
               </div>
 
@@ -93,18 +107,25 @@ const AdminAllOrders = () => {
 
               {/* Change Order Status */}
               <div className="flex mt-6 space-x-4">
-                <button
-                  onClick={() => handleStatusChange(order.id, "Ongoing")}
-                  className="px-4 py-2 text-white transition-all bg-yellow-500 rounded-lg hover:bg-yellow-600"
-                >
-                  Mark as Ongoing
-                </button>
-                <button
-                  onClick={() => handleStatusChange(order.id, "Completed")}
-                  className="px-4 py-2 text-white transition-all bg-green-500 rounded-lg hover:bg-green-600"
-                >
-                  Mark as Completed
-                </button>
+                {activeTab === "live" && (
+                  <button
+                    onClick={() => handleStatusChange(order.id, "ongoing")}
+                    className="px-4 py-2 text-white transition-all bg-yellow-500 rounded-lg hover:bg-yellow-600"
+                  >
+                    Mark as Ongoing
+                  </button>
+                )}
+                {activeTab === "ongoing" && (
+                  <button
+                    onClick={() => handleStatusChange(order.id, "completed")}
+                    className="px-4 py-2 text-white transition-all bg-green-500 rounded-lg hover:bg-green-600"
+                  >
+                    Mark as Completed
+                  </button>
+                )}
+                {activeTab === "completed" && (
+                  <p className="text-gray-500">Order completed</p>
+                )}
               </div>
             </div>
           ))}
