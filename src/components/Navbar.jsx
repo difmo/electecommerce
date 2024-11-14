@@ -56,7 +56,7 @@ const Navbar = ({ setData, cart }) => {
       <header className="sticky top-0 z-50 shadow-md">
         <div className="relative flex items-center justify-between w-full p-4 bg-maincolor ">
           <Link to={"/"} className="text-2xl font-bold text-white">
-            Name
+            Jyoti Electronics 
           </Link>
 
           <button
