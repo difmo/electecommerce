@@ -13,7 +13,7 @@ const AdminSideMenu = () => {
         return <AdminDashboard />;
       case "Orders":
         return <AdminAllOrders />;
-      case "Items":
+      case "Products":
         return <AllItemsPage />;
       default:
         return <AdminDashboard />;
@@ -22,7 +22,8 @@ const AdminSideMenu = () => {
 
   const handleMenuClick = (view) => {
     setCurrentView(view);
-    if (window.innerWidth < 1024) {  // Close sidebar on mobile/tablet after selecting a menu
+    if (window.innerWidth < 1024) {
+      // Close sidebar on mobile/tablet after selecting a menu
       setIsSidebarOpen(false);
     }
   };
@@ -37,7 +38,7 @@ const AdminSideMenu = () => {
       >
         <h2 className="mb-6 text-2xl font-bold text-center">Admin Menu</h2>
         <ul className="p-0 list-none">
-          {["Dashboard", "Items", "Orders"].map((item) => (
+          {["Dashboard", "Products", "Orders"].map((item) => (
             <li
               key={item}
               className="px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
@@ -58,9 +59,7 @@ const AdminSideMenu = () => {
       </button>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        {renderContent()}
-      </div>
+      <div className="flex-1 overflow-auto">{renderContent()}</div>
     </div>
   );
 };

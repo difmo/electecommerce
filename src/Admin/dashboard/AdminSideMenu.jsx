@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import AdminDashboard from "../MenuPages/AdminDashboard";
 import AllItemsPage from "../MenuPages/AllItemsPage";
 import AdminAllOrders from "../MenuPages/AdminAllOrders";
-import { AiOutlineDashboard, AiOutlineAppstoreAdd, AiOutlineShoppingCart } from "react-icons/ai"; // Import icons
+import {
+  AiOutlineDashboard,
+  AiOutlineAppstoreAdd,
+  AiOutlineShoppingCart,
+} from "react-icons/ai"; // Import icons
 
 const AdminSideMenu = () => {
   const [currentView, setCurrentView] = useState("AdminDashboard");
@@ -14,7 +18,7 @@ const AdminSideMenu = () => {
         return <AdminDashboard />;
       case "Orders":
         return <AdminAllOrders />;
-      case "Items":
+      case "Products":
         return <AllItemsPage />;
       default:
         return <AdminDashboard />;
@@ -23,7 +27,8 @@ const AdminSideMenu = () => {
 
   const handleMenuClick = (view) => {
     setCurrentView(view);
-    if (window.innerWidth < 1024) {  // Close sidebar on mobile/tablet after selecting a menu
+    if (window.innerWidth < 1024) {
+      // Close sidebar on mobile/tablet after selecting a menu
       setIsSidebarOpen(false);
     }
   };
@@ -48,12 +53,12 @@ const AdminSideMenu = () => {
             Dashboard
           </li>
           <li
-            key="Items"
+            key="Products"
             className="flex items-center px-4 py-3 mb-2 text-gray-700 transition duration-200 bg-gray-100 rounded-lg cursor-pointer hover:bg-blue-500 hover:text-white"
-            onClick={() => handleMenuClick("Items")}
+            onClick={() => handleMenuClick("Products")}
           >
             <AiOutlineAppstoreAdd size={20} className="mr-3" />
-            Items
+            Products
           </li>
           <li
             key="Orders"
@@ -75,9 +80,7 @@ const AdminSideMenu = () => {
       </button>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        {renderContent()}
-      </div>
+      <div className="flex-1 overflow-auto">{renderContent()}</div>
     </div>
   );
 };

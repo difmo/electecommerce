@@ -3,12 +3,14 @@ import { db, collection, getDocs, doc, deleteDoc } from "../../firebase";
 import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import AdditemForm from "./AdditemForm";
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const AllItemsPage = () => {
   const [items, setItems] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
-  const [expandedDescription, setExpandedDescription] = useState(null); // Track expanded description
+  const [expandedDescription, setExpandedDescription] = useState(null);
 
   const fetchItems = async () => {
     try {
@@ -41,7 +43,7 @@ const AllItemsPage = () => {
 
   const handleCloseForm = () => {
     setShowForm(false);
-    setItemToEdit(null); 
+    setItemToEdit(null);
   };
 
   const handleToggleDescription = (itemId) => {
@@ -53,64 +55,84 @@ const AllItemsPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 bg-gray-100 md:p-10">
-      <button
-        onClick={() => setShowForm(true)}
-        className="fixed z-20 p-4 text-white transition bg-blue-500 rounded-full shadow-lg bottom-5 right-5 hover:bg-blue-700"
-      >
-        <AiOutlinePlus size={24} />
-      </button>
+    <div className="min-h-screen bg-gray-50 p-6 md:p-12">
+      <header className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">All Items</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center p-3 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none"
+        >
+          <AiOutlinePlus size={24} />
+          <span className="ml-2 hidden md:block">Add Item</span>
+        </button>
+      </header>
 
-      <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
-          <div key={item.id} className="relative p-5 bg-white rounded-lg shadow-lg">
-            <div className="w-full h-48 mb-4">
+          <div
+            key={item.id}
+            className="relative p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+          >
+            <div className="w-full h-56 mb-4">
               <Slider
                 dots={true}
                 infinite={true}
                 speed={500}
                 slidesToShow={1}
                 slidesToScroll={1}
+                className="rounded-md overflow-hidden"
               >
                 {(item.images ?? []).map((imgSrc, index) => (
                   <div key={index}>
                     <img
-                      src={imgSrc || "https://via.placeholder.com/150"}
+                      src={imgSrc || "https://via.placeholder.com/300"}
                       alt={item.title}
-                      className="object-cover w-full h-48 rounded-md"
+                      className="object-cover w-full h-56"
+                      loading="lazy"
                     />
                   </div>
                 ))}
               </Slider>
             </div>
 
-            <h3 className="mb-2 text-xl font-semibold">{item.title}</h3>
-            
-            {/* Short Description with Toggle */}
-            <p 
-              className={`mb-2 text-sm text-gray-500 ${expandedDescription === item.id ? "line-clamp-none" : "line-clamp-1"}`}
-              onClick={() => handleToggleDescription(item.id)} 
-              style={{cursor: "pointer"}}
+            <h3 className="mb-2 text-lg font-bold text-gray-800">
+              {item.title}
+            </h3>
+            <p
+              className={`text-sm text-gray-600 transition-all duration-300 cursor-pointer ${
+                expandedDescription === item.id
+                  ? "line-clamp-none"
+                  : "line-clamp-2"
+              }`}
+              onClick={() => handleToggleDescription(item.id)}
+              title="Click to expand or collapse description"
             >
               {item.shortDescription}
-              <span className="text-blue-500">{expandedDescription === item.id ? " Less" : " ...More"}</span>
+              <span className="ml-1 text-blue-500">
+                {expandedDescription === item.id ? "Show Less" : "...More"}
+              </span>
             </p>
-            
-            <p className={`mb-4 text-gray-700 ${expandedDescription === item.id ? "" : "hidden"}`}>{item.description}</p>
-            
-            <p className="font-bold text-gray-800">{`₹${item.price}`}</p>
 
-            {/* Edit and Delete Buttons */}
-            <div className="absolute flex space-x-2 top-2 right-2 ">
+            {expandedDescription === item.id && (
+              <p className="mt-2 text-gray-700">{item.description}</p>
+            )}
+
+            <p className="mt-4 text-lg font-semibold text-gray-900">
+              ₹{item.price}
+            </p>
+
+            <div className="absolute top-3 right-3 flex space-x-2">
               <button
                 onClick={() => handleEdit(item)}
-                className="p-2 text-blue-500 bg-white rounded-full shadow-md hover:bg-gray-100"
+                className="p-2 bg-gray-100 text-blue-500 rounded-full shadow hover:bg-gray-200"
+                title="Edit Item"
               >
                 <AiOutlineEdit size={20} />
               </button>
               <button
                 onClick={() => handleDelete(item.id)}
-                className="p-2 text-red-500 bg-white rounded-full shadow-md hover:bg-gray-100"
+                className="p-2 bg-gray-100 text-red-500 rounded-full shadow hover:bg-gray-200"
+                title="Delete Item"
               >
                 <AiOutlineDelete size={20} />
               </button>
@@ -120,8 +142,14 @@ const AllItemsPage = () => {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="h-[600px] w-[800px] p-8 bg-white rounded-lg shadow-lg overflow-y-scroll">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="relative w-full max-w-3xl p-8 bg-white rounded-lg shadow-lg">
+            <button
+              onClick={handleCloseForm}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
             <AdditemForm
               closeForm={handleCloseForm}
               itemToEdit={itemToEdit}
